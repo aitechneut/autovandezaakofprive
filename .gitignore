@@ -1,0 +1,112 @@
+# macOS System Files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Thumbnails
+Thumbs.db
+ehthumbs.db
+
+# IDE and Editor Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# Development Files
+test-local.php
+test/
+tests/
+*.test.php
+*.spec.php
+
+# Project Management Files
+ARCHIVE_CHAT_*.md
+PROJECT_STATUS_*.md
+TODO.md
+NOTES.md
+
+# Logs
+*.log
+error_log
+access_log
+deployments.log
+
+# Cache Files
+cache/
+tmp/
+temp/
+
+# Backup Files
+*.backup
+*.bak
+*.old
+backup/
+
+# Environment Files
+.env
+.env.local
+.env.*.local
+config/local.php
+
+# Dependencies (if we add any later)
+vendor/
+node_modules/
+bower_components/
+
+# Compiled/Minified Files (keep source only)
+*.min.css
+*.min.js
+!assets/*.min.* # Allow our own minified files
+
+# Database Files
+*.sql
+*.sqlite
+*.db
+
+# Documentation Builds
+docs/_build/
+docs/.doctrees/
+
+# Sensitive Data
+credentials.php
+secrets.php
+passwords.txt
+
+# Temporary Files
+*.tmp
+~$*
+
+# PHP Specific
+composer.phar
+/phpunit.xml
+.phpunit.result.cache
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
+
+# OS Generated Files
+Desktop.ini
+$RECYCLE.BIN/
+
+# Custom Excludes for This Project
+/old/
+/backup/
+/draft/
+test-*.php
+!test-rdw.php # Allow the official test file
