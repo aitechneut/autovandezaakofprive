@@ -47,6 +47,23 @@ define('BIJTELLING_YOUNGTIMER_PERCENTAGE', 35);
 define('BIJTELLING_YOUNGTIMER_MIN_AGE', 15);
 define('BIJTELLING_YOUNGTIMER_MAX_AGE', 30);
 
+// MRB Settings (2025)
+define('MRB_ELEKTRISCH_KORTING', 0.75); // 25% korting in 2025
+define('MRB_PROVINCIE_OPCENTEN', [
+    'noord-holland' => 67.0,
+    'zuid-holland' => 95.5,
+    'utrecht' => 77.5,
+    'noord-brabant' => 79.3,
+    'gelderland' => 88.9,
+    'limburg' => 77.9,
+    'overijssel' => 79.9,
+    'flevoland' => 65.3,
+    'groningen' => 92.0,
+    'friesland' => 87.0,
+    'drenthe' => 92.0,
+    'zeeland' => 80.8
+]);
+
 // Error Messages
 define('ERROR_KENTEKEN_INVALID', 'Ongeldig kenteken formaat');
 define('ERROR_RDW_API_DOWN', 'RDW API is momenteel niet beschikbaar');
@@ -57,11 +74,35 @@ define('ERROR_CALCULATION_FAILED', 'Berekening mislukt, controleer de invoer');
 if (ENVIRONMENT === 'development') {
     error_reporting(E_ALL);
     ini_set('display_errors', 1);
+    ini_set('log_errors', 1);
+    ini_set('error_log', __DIR__ . '/../logs/error.log');
 } else {
     error_reporting(0);
     ini_set('display_errors', 0);
+    ini_set('log_errors', 1);
+    ini_set('error_log', __DIR__ . '/../logs/error.log');
 }
+
+// Session Settings
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_secure', 1); // Only on HTTPS
 
 // Timezone
 date_default_timezone_set('Europe/Amsterdam');
-?>
+
+// Helper function to get config value
+function getConfig($key, $default = null) {
+    if (defined($key)) {
+        return constant($key);
+    }
+    return $default;
+}
+
+// Autoload function for future class loading
+spl_autoload_register(function ($class) {
+    $file = __DIR__ . '/../classes/' . str_replace('\\', '/', $class) . '.php';
+    if (file_exists($file)) {
+        require_once $file;
+    }
+});
