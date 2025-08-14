@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AutoKosten Calculator - Bereken of een auto van de zaak of privé auto voordeliger is. Nederlandse bijtelling calculator met RDW kenteken lookup.">
+    <meta name="author" content="PianoManOnTour.nl">
+    <meta name="keywords" content="auto van de zaak, bijtelling, autokostencalculator, zakelijke auto, privé auto, youngtimer, RDW kenteken">
+    
+    <title>AutoKosten Calculator - Auto van de Zaak of Privé? | PianoManOnTour.nl</title>
+    
+    <!-- Chart.js voor grafieken -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="assets/style.css">
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="AutoKosten Calculator - Auto van de Zaak of Privé?">
+    <meta property="og:description" content="Bereken wat voordeliger is: een auto van de zaak of privé rijden. Met actuele Nederlandse bijtelling regels.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.pianomanontour.nl/autovandezaakofprive">
+</head>
+<body>
+    <div class="container">
+        <div class="app-container">
+            <!-- Header met Auto Manager -->
+            <header class="header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1>🚗 AutoKosten Calculator</h1>
+                        <p class="subtitle">Ontdek wat voordeliger is: Auto van de Zaak of Privé rijden</p>
+                    </div>
+                    <!-- Auto Manager Button -->
+                    <div class="auto-manager-controls">
+                        <button type="button" class="btn btn-primary" onclick="openAutoManager()">
+                            <span class="btn-icon">📚</span> Mijn Auto's (<span id="auto-count">0</span>)
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="saveCurrentAuto()" id="save-auto-btn">
+                            <span class="btn-icon">💾</span> Auto Opslaan
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Navigation Tabs - Nu met 5 tabs -->
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-tab="vehicle">Voertuig Gegevens</button>
+                <button class="nav-tab" data-tab="usage">Gebruik & Kosten</button>
+                <button class="nav-tab" data-tab="financial">Financiële Situatie</button>
+                <button class="nav-tab" data-tab="results">Resultaten</button>
+                <button class="nav-tab" data-tab="analyse">Analyse</button>
+            </nav>
+
+            <!-- Form Sections -->
+            <form id="calculator-form">
+                <!-- Section 1: Vehicle Data -->
+                <section class="form-section active" id="vehicle-section">
+                    <h2 class="section-title">📋 Voertuig Gegevens</h2>
+                    
+                    <!-- Auto Naam voor opslag -->
+                    <div class="form-group" style="background: var(--light-purple); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                        <label for="auto_naam" class="form-label">
+                            Auto Naam (voor opslag)
+                            <span class="tooltip" data-tooltip="Geef deze auto een herkenbare naam">ⓘ</span>
+                        </label>
+                        <input type="text" 
+                               id="auto_naam" 
+                               name="auto_naam" 
+                               class="form-input" 
+                               placeholder="Bijv. Tesla Model 3 2023"
+                               style="font-weight: 600;">
+                    </div>
+                    
+                    <div class="kenteken-group form-group">
+                        <label for="kenteken" class="form-label">
+                            Kenteken
+                            <span class="tooltip" data-tooltip="Vul kenteken in voor automatische gegevens">ⓘ</span>
+                        </label>
+                        <div style="position: relative;">
+                            <input type="text" 
+                                   id="kenteken" 
+                                   name="kenteken" 
+                                   class="form-input kenteken-input" 
+                                   placeholder="XX-XXX-X"
+                                   maxlength="8"
+                                   pattern="[A-Z0-9-]+"
+                                   aria-label="Kenteken invoeren">
+                            <button type="button" id="lookup-btn" class="lookup-button">
+                                Ophalen
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="merk" class="form-label">Merk</label>
+                            <input type="text" id="merk" name="merk" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="model" class="form-label">Model</label>
+                            <input type="text" id="model" name="model" class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bouwjaar" class="form-label">
+                                Bouwjaar
+                                <span class="tooltip" data-tooltip="Bepaalt bijtelling percentage">ⓘ</span>
+                            </label>
+                            <input type="number" id="bouwjaar" name="bouwjaar" class="form-input" 
+                                   min="1990" max="2025" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="datum_eerste_toelating" class="form-label">
+                                Datum Eerste Toelating
+                                <span class="tooltip" data-tooltip="Voor exacte bijtelling berekening">ⓘ</span>
+                            </label>
+                            <input type="date" id="datum_eerste_toelating" name="datum_eerste_toelating" 
+                                   class="form-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="brandstof" class="form-label">Brandstof</label>
+                            <select id="brandstof" name="brandstof" class="form-select" required>
+                                <option value="">Selecteer brandstof</option>
+                                <option value="benzine">Benzine</option>
+                                <option value="diesel">Diesel</option>
+                                <option value="hybride">Hybride (Benzine)</option>
+                                <option value="hybride_diesel">Hybride (Diesel)</option>
+                                <option value="plugin_hybride">Plug-in Hybride</option>
+                                <option value="elektrisch">Elektrisch</option>
+                                <option value="waterstof">Waterstof</option>
+                                <option value="lpg">LPG</option>
+                                <option value="cng">CNG (Aardgas)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="gewicht" class="form-label">
+                                Gewicht (kg)
+                                <span class="tooltip" data-tooltip="Voor MRB berekening">ⓘ</span>
+                            </label>
+                            <input type="number" id="gewicht" name="gewicht" class="form-input" 
+                                   min="500" max="5000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cataloguswaarde" class="form-label">
+                                Cataloguswaarde (€)
+                                <span class="tooltip" data-tooltip="Nieuwprijs incl. BTW en BPM">ⓘ</span>
+                            </label>
+                            <input type="number" id="cataloguswaarde" name="cataloguswaarde" 
+                                   class="form-input" min="0" step="100" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dagwaarde" class="form-label">
+                                Huidige Dagwaarde (€)
+                                <span class="tooltip" data-tooltip="Voor youngtimers (15+ jaar)">ⓘ</span>
+                            </label>
+                            <input type="number" id="dagwaarde" name="dagwaarde" 
+                                   class="form-input" min="0" step="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="co2_uitstoot" class="form-label">
+                                CO2 Uitstoot (g/km)
+                                <span class="tooltip" data-tooltip="Voor historische bijtelling">ⓘ</span>
+                            </label>
+                            <input type="number" id="co2_uitstoot" name="co2_uitstoot" 
+                                   class="form-input" min="0" max="500">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="kilometerstand" class="form-label">Kilometerstand</label>
+                            <input type="number" id="kilometerstand" name="kilometerstand" 
+                                   class="form-input" min="0">
+                        </div>
+                    </div>
+
+                    <!-- Auto Status Info Cards -->
+                    <div class="results-grid" style="margin-top: 2rem;">
+                        <div class="info-card">
+                            <h3 class="info-card-title">⏰ Voertuig Status</h3>
+                            <div class="info-card-value" id="vehicle-status">-</div>
+                            <p class="info-card-description" id="vehicle-status-desc">
+                                Vul gegevens in voor status
+                            </p>
+                        </div>
+
+                        <div class="info-card">
+                            <h3 class="info-card-title">📊 Bijtelling Percentage</h3>
+                            <div class="info-card-value" id="bijtelling-preview">-</div>
+                            <p class="info-card-description" id="bijtelling-desc">
+                                Wordt automatisch berekend
+                            </p>
+                        </div>
+
+                        <div class="info-card">
+                            <h3 class="info-card-title">💰 Basis voor Bijtelling</h3>
+                            <div class="info-card-value" id="bijtelling-basis">-</div>
+                            <p class="info-card-description" id="basis-desc">
+                                Catalogus- of dagwaarde
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="text-align: right; margin-top: 2rem;">
+                        <button type="button" class="btn btn-primary btn-large" onclick="nextTab('usage')">
+                            Volgende: Gebruik & Kosten →
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Section 2: Usage & Costs -->
+                <section class="form-section" id="usage-section">
+                    <h2 class="section-title">🚗 Gebruik & Kosten</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="km_per_maand" class="form-label">
+                                Kilometers per Maand
+                                <span class="tooltip" data-tooltip="Gemiddeld privé + zakelijk">ⓘ</span>
+                            </label>
+                            <input type="number" id="km_per_maand" name="km_per_maand" 
+                                   class="form-input" min="0" max="10000" value="1500" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="verbruik" class="form-label">
+                                Verbruik
+                                <span class="tooltip" data-tooltip="Brandstof of elektriciteit">ⓘ</span>
+                            </label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="number" id="verbruik" name="verbruik" 
+                                       class="form-input" min="0" step="0.1" required>
+                                <select id="verbruik_eenheid" name="verbruik_eenheid" class="form-select" style="width: 150px;">
+                                    <option value="l_100km">L/100km</option>
+                                    <option value="km_l">km/L</option>
+                                    <option value="kwh_100km">kWh/100km</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="brandstofprijs" class="form-label">
+                                Brandstofprijs (€)
+                                <span class="tooltip" data-tooltip="Per liter of kWh">ⓘ</span>
+                            </label>
+                            <input type="number" id="brandstofprijs" name="brandstofprijs" 
+                                   class="form-input" min="0" step="0.01" value="2.10" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mrb_per_maand" class="form-label">
+                                MRB per Maand (€)
+                                <span class="tooltip" data-tooltip="Motorrijtuigenbelasting">ⓘ</span>
+                            </label>
+                            <input type="number" id="mrb_per_maand" name="mrb_per_maand" 
+                                   class="form-input" min="0" step="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="verzekering_per_maand" class="form-label">
+                                Verzekering per Maand (€)
+                            </label>
+                            <input type="number" id="verzekering_per_maand" name="verzekering_per_maand" 
+                                   class="form-input" min="0" step="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="onderhoud_per_maand" class="form-label">
+                                Onderhoud per Maand (€)
+                                <span class="tooltip" data-tooltip="Incl. APK, banden, etc.">ⓘ</span>
+                            </label>
+                            <input type="number" id="onderhoud_per_maand" name="onderhoud_per_maand" 
+                                   class="form-input" min="0" step="1" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="aankoopprijs" class="form-label">
+                                Aankoopprijs (€)
+                                <span class="tooltip" data-tooltip="Voor afschrijving berekening">ⓘ</span>
+                            </label>
+                            <input type="number" id="aankoopprijs" name="aankoopprijs" 
+                                   class="form-input" min="0" step="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="verwachte_restwaarde" class="form-label">
+                                Verwachte Restwaarde (€)
+                            </label>
+                            <input type="number" id="verwachte_restwaarde" name="verwachte_restwaarde" 
+                                   class="form-input" min="0" step="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="afschrijving_jaren" class="form-label">
+                                Afschrijvingsperiode (jaren)
+                            </label>
+                            <input type="number" id="afschrijving_jaren" name="afschrijving_jaren" 
+                                   class="form-input" min="1" max="10" value="5" required>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary btn-large" onclick="previousTab('vehicle')">
+                            ← Terug
+                        </button>
+                        <button type="button" class="btn btn-primary btn-large" onclick="nextTab('financial')">
+                            Volgende: Financiële Situatie →
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Section 3: Financial Situation -->
+                <section class="form-section" id="financial-section">
+                    <h2 class="section-title">💼 Financiële Situatie</h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="gebruiker_type" class="form-label">
+                                Type Gebruiker
+                            </label>
+                            <select id="gebruiker_type" name="gebruiker_type" class="form-select" required>
+                                <option value="ondernemer">Ondernemer (IB)</option>
+                                <option value="werknemer">Werknemer (LB)</option>
+                                <option value="dga">DGA / Directeur-grootaandeelhouder</option>
+                                <option value="prive">Privé (geen zakelijk gebruik)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bruto_inkomen" class="form-label">
+                                Bruto Jaarinkomen (€)
+                                <span class="tooltip" data-tooltip="Voor belastingschijf bepaling">ⓘ</span>
+                            </label>
+                            <input type="number" id="bruto_inkomen" name="bruto_inkomen" 
+                                   class="form-input" min="0" step="1000" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="belasting_percentage" class="form-label">
+                                Inkomstenbelasting %
+                                <span class="tooltip" data-tooltip="Wordt automatisch berekend">ⓘ</span>
+                            </label>
+                            <input type="number" id="belasting_percentage" name="belasting_percentage" 
+                                   class="form-input" min="0" max="52" step="0.1" readonly>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="zakelijk_gebruik" class="form-label">
+                                Zakelijk Gebruik %
+                                <span class="tooltip" data-tooltip="Percentage zakelijke kilometers">ⓘ</span>
+                            </label>
+                            <input type="number" id="zakelijk_gebruik" name="zakelijk_gebruik" 
+                                   class="form-input" min="0" max="100" value="50" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="verklaring_geen_prive" class="form-label">
+                                <input type="checkbox" id="verklaring_geen_prive" name="verklaring_geen_prive">
+                                Verklaring Geen Privégebruik
+                                <span class="tooltip" data-tooltip="Max 500km privé per jaar">ⓘ</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bestelauto_uitzondering" class="form-label">
+                                <input type="checkbox" id="bestelauto_uitzondering" name="bestelauto_uitzondering">
+                                Bestelauto Uitzondering
+                                <span class="tooltip" data-tooltip="Uitsluitend geschikt voor goederenvervoer">ⓘ</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Tax Info Cards -->
+                    <div class="results-grid" style="margin-top: 2rem;">
+                        <div class="info-card">
+                            <h3 class="info-card-title">📊 Effectief Belastingtarief</h3>
+                            <div class="info-card-value" id="effectief-tarief">-</div>
+                            <p class="info-card-description">Op basis van inkomen</p>
+                        </div>
+
+                        <div class="info-card">
+                            <h3 class="info-card-title">💰 Maandelijkse Bijtelling</h3>
+                            <div class="info-card-value" id="maandelijkse-bijtelling">-</div>
+                            <p class="info-card-description">Bruto bijtelling bedrag</p>
+                        </div>
+
+                        <div class="info-card">
+                            <h3 class="info-card-title">🏦 Netto Kosten</h3>
+                            <div class="info-card-value" id="netto-bijtelling">-</div>
+                            <p class="info-card-description">Extra belasting per maand</p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary btn-large" onclick="previousTab('usage')">
+                            ← Terug
+                        </button>
+                        <button type="button" class="btn btn-success btn-large" onclick="calculateResults()">
+                            Bereken Resultaten 📊
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Section 4: Results -->
+                <section class="form-section" id="results-section">
+                    <h2 class="section-title">📊 Resultaten & Advies</h2>
+                    
+                    <div id="results-container" class="results-section">
+                        <!-- Results will be dynamically inserted here -->
+                        <div style="text-align: center; padding: 3rem;">
+                            <p style="font-size: 1.125rem; color: var(--dark-gray);">
+                                Vul eerst alle gegevens in om de berekening te maken.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 2rem; gap: 1rem;">
+                        <button type="button" class="btn btn-secondary btn-large" onclick="previousTab('financial')">
+                            ← Terug
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="exportResults()">
+                            📥 Export JSON
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="window.print()">
+                            🖨️ Print
+                        </button>
+                        <button type="button" class="btn btn-primary btn-large" onclick="nextTab('analyse')">
+                            Naar Analyse →
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Section 5: Analyse (NIEUW) -->
+                <section class="form-section" id="analyse-section">
+                    <h2 class="section-title">📈 Analyse & Vergelijking</h2>
+                    
+                    <!-- Auto Selector voor Vergelijking -->
+                    <div class="auto-selector-panel" id="auto-selector-panel" style="display: none;">
+                        <h3>Selecteer auto's om te vergelijken:</h3>
+                        <div id="auto-checkboxes" class="auto-checkbox-list">
+                            <!-- Dynamisch gegenereerde checkboxes komen hier -->
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="updateCharts()">
+                            Grafieken Bijwerken
+                        </button>
+                    </div>
+                    
+                    <!-- Besparing Highlight -->
+                    <div class="besparing-highlight" id="besparing-highlight">
+                        <h2 id="besparing-text">Voer eerst een berekening uit</h2>
+                        <p id="besparing-detail">Klik op "Bereken Resultaten" in de vorige tab</p>
+                    </div>
+                    
+                    <!-- Charts Grid -->
+                    <div class="charts-grid">
+                        <!-- Kostenvergelijking Chart -->
+                        <div class="chart-card">
+                            <h3 class="chart-title">💰 Maandelijkse Kosten Vergelijking</h3>
+                            <canvas id="kostenChart"></canvas>
+                        </div>
+                        
+                        <!-- Kostenverloop Chart -->
+                        <div class="chart-card">
+                            <h3 class="chart-title">📈 5-Jaars Kostenprojectie</h3>
+                            <canvas id="verloopChart"></canvas>
+                        </div>
+                        
+                        <!-- Kostenverdeling Charts -->
+                        <div class="chart-card">
+                            <h3 class="chart-title">🥧 Kostenverdeling Zakelijk</h3>
+                            <canvas id="verdelingZakelijkChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-card">
+                            <h3 class="chart-title">🥧 Kostenverdeling Privé</h3>
+                            <canvas id="verdelingPriveChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Multi-Auto Vergelijking (wanneer meerdere auto's opgeslagen) -->
+                    <div class="compare-section" id="compare-section" style="display: none;">
+                        <h3>🚗 Auto Vergelijking</h3>
+                        <div class="chart-card" style="width: 100%;">
+                            <canvas id="multiAutoChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary btn-large" onclick="previousTab('results')">
+                            ← Terug naar Resultaten
+                        </button>
+                        <button type="button" class="btn btn-success btn-large" onclick="resetCalculator()">
+                            🔄 Nieuwe Berekening
+                        </button>
+                    </div>
+                </section>
+            </form>
+
+            <!-- Auto Manager Modal -->
+            <div id="auto-manager-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>📚 Mijn Opgeslagen Auto's</h2>
+                        <button type="button" class="modal-close" onclick="closeAutoManager()">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="saved-autos-list">
+                            <!-- Dynamisch gegenereerde auto lijst -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeAutoManager()">Sluiten</button>
+                        <button type="button" class="btn btn-primary" onclick="compareSelectedAutos()">
+                            Vergelijk Geselecteerde
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer style="text-align: center; padding: 2rem; border-top: 1px solid var(--medium-gray); margin-top: 3rem;">
+                <p style="color: var(--dark-gray); font-size: 0.875rem;">
+                    © 2025 <a href="https://www.pianomanontour.nl" style="color: #667eea; text-decoration: none;">PianoManOnTour.nl</a> 
+                    | AutoKosten Calculator | Laatste update: Januari 2025
+                </p>
+                <p style="color: var(--dark-gray); font-size: 0.75rem; margin-top: 0.5rem;">
+                    Deze calculator is voor indicatieve doeleinden. Raadpleeg altijd een belastingadviseur voor persoonlijk advies.
+                </p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/autovandezaakofprive.js"></script>
+</body>
+</html>

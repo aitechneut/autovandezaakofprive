@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoKosten Calculator - Deployment Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 50px 20px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .status {
+            font-size: 1.5em;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(46, 204, 113, 0.2);
+            border-radius: 10px;
+            border: 2px solid #2ecc71;
+        }
+        .timestamp {
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-top: 20px;
+        }
+        .links {
+            margin-top: 30px;
+        }
+        .links a {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            padding: 12px 25px;
+            margin: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 AutoKosten Calculator</h1>
+        <div class="status">
+            ✅ Deployment Test Succesvol!
+        </div>
+        <p>GitHub Repository is correct gekoppeld aan Hostinger.</p>
+        <div class="timestamp">
+            Deployment: <?php echo date('d-m-Y H:i:s'); ?>
+        </div>
+        <div class="links">
+            <a href="index.php">🚗 Start Calculator</a>
+            <a href="https://github.com/aitechneut/autovandezaakofprive">📁 GitHub Repo</a>
+        </div>
+        <p><small>Hostinger Auto-Deploy Working! 🚀</small></p>
+    </div>
+</body>
+</html>
