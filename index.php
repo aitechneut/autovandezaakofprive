@@ -200,17 +200,40 @@ $bijtellingRules = [
                         </div>
 
                         <div class="form-group">
+                            <label for="co2_uitstoot" class="form-label">
+                                CO2 Uitstoot (g/km)
+                                <span class="tooltip" data-tooltip="Voor milieu-informatie">ⓘ</span>
+                            </label>
+                            <input type="number" id="co2_uitstoot" name="co2_uitstoot" class="form-input" 
+                                   min="0" max="500">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="kilometerstand" class="form-label">
+                                Kilometerstand
+                                <span class="tooltip" data-tooltip="Voor onderhoudsschatting">ⓘ</span>
+                            </label>
+                            <input type="number" id="kilometerstand" name="kilometerstand" class="form-input" 
+                                   min="0" max="999999">
+                        </div>
+
+                        <div class="form-group">
                             <label for="cataloguswaarde" class="form-label">
                                 Cataloguswaarde (€)
-                                <span class="tooltip" data-tooltip="Nieuwprijs incl. BTW en BPM">ⓘ</span>
+                                <span class="tooltip" data-tooltip="Nieuwprijs voor bijtelling">ⓘ</span>
                             </label>
-                            <input type="number" id="cataloguswaarde" name="cataloguswaarde" 
-                                   class="form-input" min="0" step="100" required>
+                            <input type="number" id="cataloguswaarde" name="cataloguswaarde" class="form-input" 
+                                   min="0" step="100" required>
                         </div>
 
                         <div class="form-group">
                             <label for="dagwaarde" class="form-label">
-                                Huidige Dagwaarde (€)
+                                Dagwaarde (€)
+                                <span class="tooltip" data-tooltip="Alleen voor youngtimers (15+ jaar)">ⓘ</span>
+                            </label>
+                            <input type="number" id="dagwaarde" name="dagwaarde" class="form-input" 
+                                   min="0" step="100" 
+                                   placeholder="Alleen voor youngtimers">
                                 <span class="tooltip" data-tooltip="Voor youngtimers (15+ jaar)">ⓘ</span>
                             </label>
                             <input type="number" id="dagwaarde" name="dagwaarde" 

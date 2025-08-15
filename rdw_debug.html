@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RDW Debug Test - AutoKosten Calculator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #764ba2;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #764ba2;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .result-item {
+            padding: 10px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+        }
+        .result-item.filled {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .result-item.empty {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+        .console {
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .console-line {
+            margin: 2px 0;
+        }
+        .label-success { color: #10b981; }
+        .label-error { color: #ef4444; }
+        .label-warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 RDW Debug Test</h1>
+        <p class="subtitle">Test welke RDW velden correct worden ingevuld</p>
+
+        <!-- Test Controls -->
+        <div class="test-section">
+            <h2>📝 Test Kenteken</h2>
+            <div class="form-group">
+                <label>Kenteken:</label>
+                <input type="text" id="test-kenteken" value="99-ZZH-3" placeholder="XX-XXX-X">
+            </div>
+            <button class="btn" onclick="testRDWLookup()">Test RDW Lookup</button>
+            <button class="btn btn-success" onclick="testKnownKenteken()">Test Met Bekend Kenteken</button>
+            <button class="btn btn-warning" onclick="clearAll()">Clear Alles</button>
+        </div>
+
+        <!-- Console Output -->
+        <div class="test-section">
+            <h2>📊 Console Output</h2>
+            <div class="console" id="console-output">
+                <div class="console-line">Ready voor testing...</div>
+            </div>
+        </div>
+
+        <!-- Form Fields Status -->
+        <div class="test-section">
+            <h2>✅ Form Velden Status</h2>
+            <div class="grid" id="field-status">
+                <!-- Wordt dynamisch gevuld -->
+            </div>
+        </div>
+
+        <!-- Test Form -->
+        <div class="test-section">
+            <h2>📋 Test Formulier</h2>
+            <div class="grid">
+                <div class="form-group">
+                    <label>Kenteken:</label>
+                    <input type="text" id="kenteken" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Merk:</label>
+                    <input type="text" id="merk" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Model:</label>
+                    <input type="text" id="model" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Bouwjaar:</label>
+                    <input type="number" id="bouwjaar" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Datum Eerste Toelating:</label>
+                    <input type="date" id="datum_eerste_toelating" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Brandstof:</label>
+                    <select id="brandstof" disabled>
+                        <option value="">Selecteer brandstof</option>
+                        <option value="benzine">Benzine</option>
+                        <option value="diesel">Diesel</option>
+                        <option value="hybride">Hybride (Benzine)</option>
+                        <option value="hybride_diesel">Hybride (Diesel)</option>
+                        <option value="plugin_hybride">Plug-in Hybride</option>
+                        <option value="elektrisch">Elektrisch</option>
+                        <option value="waterstof">Waterstof</option>
+                        <option value="lpg">LPG</option>
+                        <option value="cng">CNG (Aardgas)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Gewicht (kg):</label>
+                    <input type="number" id="gewicht" readonly>
+                </div>
+                <div class="form-group">
+                    <label>CO2 Uitstoot (g/km):</label>
+                    <input type="number" id="co2_uitstoot" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Kilometerstand:</label>
+                    <input type="number" id="kilometerstand" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Cataloguswaarde (€):</label>
+                    <input type="number" id="cataloguswaarde" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Dagwaarde (€):</label>
+                    <input type="number" id="dagwaarde" readonly>
+                </div>
+            </div>
+        </div>
+
+        <!-- Raw API Response -->
+        <div class="test-section">
+            <h2>🔍 Raw API Response</h2>
+            <pre id="raw-response" style="background: #f8f9fa; padding: 15px; border-radius: 6px; overflow-x: auto;">
+Nog geen data...
+            </pre>
+        </div>
+    </div>
+
+    <script>
+        // Console logging helper
+        function addConsoleLog(message, type = 'info') {
+            const console = document.getElementById('console-output');
+            const line = document.createElement('div');
+            line.className = 'console-line';
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const labelClass = type === 'success' ? 'label-success' : 
+                              type === 'error' ? 'label-error' : 
+                              'label-warning';
+            
+            line.innerHTML = `[${timestamp}] <span class="${labelClass}">${message}</span>`;
+            console.appendChild(line);
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // Clear all fields
+        function clearAll() {
+            const fields = ['kenteken', 'merk', 'model', 'bouwjaar', 'datum_eerste_toelating', 
+                          'brandstof', 'gewicht', 'co2_uitstoot', 'kilometerstand', 
+                          'cataloguswaarde', 'dagwaarde'];
+            
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            
+            document.getElementById('raw-response').textContent = 'Nog geen data...';
+            document.getElementById('console-output').innerHTML = '<div class="console-line">Console cleared...</div>';
+            updateFieldStatus();
+        }
+
+        // Update field status display
+        function updateFieldStatus() {
+            const fields = [
+                { id: 'kenteken', label: 'Kenteken' },
+                { id: 'merk', label: 'Merk' },
+                { id: 'model', label: 'Model' },
+                { id: 'bouwjaar', label: 'Bouwjaar' },
+                { id: 'datum_eerste_toelating', label: 'Datum Eerste Toelating' },
+                { id: 'brandstof', label: 'Brandstof' },
+                { id: 'gewicht', label: 'Gewicht' },
+                { id: 'co2_uitstoot', label: 'CO2 Uitstoot' },
+                { id: 'kilometerstand', label: 'Kilometerstand' },
+                { id: 'cataloguswaarde', label: 'Cataloguswaarde' },
+                { id: 'dagwaarde', label: 'Dagwaarde' }
+            ];
+            
+            const statusContainer = document.getElementById('field-status');
+            statusContainer.innerHTML = fields.map(field => {
+                const el = document.getElementById(field.id);
+                const hasValue = el && el.value && el.value !== '';
+                const statusClass = hasValue ? 'filled' : 'empty';
+                const statusIcon = hasValue ? '✅' : '❌';
+                const value = hasValue ? el.value : 'Leeg';
+                
+                return `
+                    <div class="result-item ${statusClass}">
+                        <strong>${statusIcon} ${field.label}:</strong><br>
+                        <small>${value}</small>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Fill form with RDW data (same as main app)
+        function fillFormWithRDWData(data) {
+            addConsoleLog('Start vullen form met RDW data...', 'info');
+            
+            // Direct mappings
+            const mappings = {
+                'merk': data.merk || '',
+                'model': data.model || data.handelsbenaming || '',
+                'bouwjaar': data.bouwjaar || '',
+                'gewicht': data.massa_ledig_voertuig || '',
+                'cataloguswaarde': data.catalogusprijs || '',
+                'co2_uitstoot': data.co2_uitstoot || '',
+                'kilometerstand': data.kilometerstand || ''
+            };
+            
+            // Fill fields
+            for (const [field, value] of Object.entries(mappings)) {
+                const element = document.getElementById(field);
+                if (element) {
+                    if (value) {
+                        element.value = value;
+                        addConsoleLog(`✅ ${field}: ${value}`, 'success');
+                    } else {
+                        addConsoleLog(`⚠️ ${field}: geen data`, 'warning');
+                    }
+                }
+            }
+            
+            // Handle date
+            if (data.datum_eerste_toelating) {
+                const dateStr = data.datum_eerste_toelating.toString();
+                let formatted = '';
+                
+                if (dateStr.length === 8) {
+                    formatted = `${dateStr.substr(0,4)}-${dateStr.substr(4,2)}-${dateStr.substr(6,2)}`;
+                } else if (dateStr.includes('-')) {
+                    formatted = dateStr;
+                }
+                
+                const dateField = document.getElementById('datum_eerste_toelating');
+                if (dateField && formatted) {
+                    dateField.value = formatted;
+                    addConsoleLog(`✅ datum_eerste_toelating: ${formatted}`, 'success');
+                }
+            }
+            
+            // Handle brandstof
+            if (data.brandstof_type) {
+                const brandstofField = document.getElementById('brandstof');
+                const mapped = mapBrandstof(data.brandstof_type);
+                if (brandstofField && mapped) {
+                    brandstofField.value = mapped;
+                    addConsoleLog(`✅ brandstof: ${data.brandstof_type} → ${mapped}`, 'success');
+                }
+            } else if (data.brandstof && Array.isArray(data.brandstof)) {
+                const brandstofField = document.getElementById('brandstof');
+                const mapped = mapBrandstof(data.brandstof[0]);
+                if (brandstofField && mapped) {
+                    brandstofField.value = mapped;
+                    addConsoleLog(`✅ brandstof: ${data.brandstof[0]} → ${mapped}`, 'success');
+                }
+            }
+            
+            // Update status display
+            updateFieldStatus();
+        }
+
+        // Map brandstof values
+        function mapBrandstof(rdwBrandstof) {
+            if (!rdwBrandstof) return '';
+            
+            const input = rdwBrandstof.toString().toLowerCase();
+            
+            const mappings = {
+                'benzine': 'benzine',
+                'diesel': 'diesel',
+                'elektrisch': 'elektrisch',
+                'elektriciteit': 'elektrisch',
+                'waterstof': 'waterstof',
+                'lpg': 'lpg',
+                'cng': 'cng',
+                'phev': 'plugin_hybride'
+            };
+            
+            if (mappings[input]) return mappings[input];
+            
+            // Contains checks
+            if (input.includes('benzin')) return 'benzine';
+            if (input.includes('diesel')) return 'diesel';
+            if (input.includes('elektr')) return 'elektrisch';
+            if (input.includes('plug')) return 'plugin_hybride';
+            if (input.includes('hybride')) return 'hybride';
+            
+            return 'benzine'; // Default
+        }
+
+        // Test RDW lookup
+        async function testRDWLookup() {
+            const kenteken = document.getElementById('test-kenteken').value.replace(/-/g, '');
+            
+            if (kenteken.length < 6) {
+                addConsoleLog('❌ Ongeldig kenteken', 'error');
+                return;
+            }
+            
+            addConsoleLog(`🔍 Start RDW lookup voor: ${kenteken}`, 'info');
+            
+            try {
+                const response = await fetch(`api/rdw-lookup.php?kenteken=${kenteken}`);
+                const result = await response.json();
+                
+                // Show raw response
+                document.getElementById('raw-response').textContent = JSON.stringify(result, null, 2);
+                
+                if (result.success && result.data) {
+                    addConsoleLog('✅ RDW data ontvangen!', 'success');
+                    document.getElementById('kenteken').value = kenteken;
+                    fillFormWithRDWData(result.data);
+                } else {
+                    addConsoleLog(`❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addConsoleLog(`❌ Fetch error: ${error.message}`, 'error');
+            }
+        }
+
+        // Test with known kenteken
+        function testKnownKenteken() {
+            const testData = {
+                kenteken: 'TEST123',
+                merk: 'Tesla',
+                model: 'Model 3',
+                handelsbenaming: 'Model 3 Long Range',
+                bouwjaar: 2022,
+                datum_eerste_toelating: '20220315',
+                massa_ledig_voertuig: 1844,
+                catalogusprijs: 52990,
+                co2_uitstoot: 0,
+                brandstof: ['Elektrisch'],
+                brandstof_type: 'Elektrisch'
+            };
+            
+            addConsoleLog('📦 Test met mock data...', 'info');
+            document.getElementById('kenteken').value = 'TEST-12-3';
+            fillFormWithRDWData(testData);
+            document.getElementById('raw-response').textContent = JSON.stringify(testData, null, 2);
+        }
+
+        // Initialize
+        updateFieldStatus();
+        addConsoleLog('✅ Debug tool ready!', 'success');
+    </script>
+</body>
+</html>
