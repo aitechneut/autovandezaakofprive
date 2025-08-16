@@ -3,7 +3,7 @@
  * AutoKosten Calculator - VERSIE 3 - Multi-Auto Vergelijker
  * 
  * @author Richard Surie
- * @version 3.0.0 - Advanced Multi-Car Comparison
+ * @version 3.1.0 - Tesla Fix & Enhanced Electric Detection
  * @website https://www.pianomanontour.nl/autovandezaakofprive
  * 
  * Features:
@@ -357,7 +357,7 @@ $currentYear = date('Y');
             <h1>🚗 AutoKosten Calculator V3</h1>
             <p class="subtitle">Multi-Auto Vergelijker met Uitgebreide Analyse</p>
             <div class="version-info">
-                <strong>Versie 3.0</strong> - Minimale invoer, maximale inzicht. Vergelijk onbeperkt auto's!
+                <strong>Versie 3.1</strong> - Tesla fix & verbeterde elektrische detectie. Vergelijk onbeperkt auto's!
             </div>
         </div>
 
@@ -406,6 +406,7 @@ $currentYear = date('Y');
                     <div class="input-group">
                         <label for="brandstofprijs">Brandstofprijs (€/liter of €/kWh)</label>
                         <input type="number" id="brandstofprijs" name="brandstofprijs" step="0.01" placeholder="1.65" required>
+                        <small style="color: #666; font-size: 0.85rem; margin-top: 5px; display: block;">💡 Tip: ~€0.25/kWh voor elektrisch, ~€1.65/l voor benzine</small>
                     </div>
 
                     <!-- Automatisch ingevulde velden -->
@@ -614,7 +615,22 @@ $currentYear = date('Y');
                 document.getElementById('model').value = vehicle.handelsbenaming || '';
                 document.getElementById('bouwjaar').value = vehicle.datum_eerste_toelating ? vehicle.datum_eerste_toelating.split('-')[0] : '';
                 document.getElementById('eerste_toelating').value = vehicle.datum_eerste_toelating || '';
-                document.getElementById('brandstof').value = vehicle.brandstof_omschrijving || '';
+                
+                // Enhanced brandstof detection for electric vehicles
+                let brandstof = vehicle.brandstof_omschrijving || '';
+                if (!brandstof && vehicle.merk && vehicle.merk.toUpperCase() === 'TESLA') {
+                    brandstof = 'Elektriciteit';
+                }
+                // Fallback detection for other electric brands
+                if (!brandstof && vehicle.handelsbenaming) {
+                    const model = vehicle.handelsbenaming.toLowerCase();
+                    if (model.includes('electric') || model.includes('ev') || model.includes('e-') || 
+                        model.includes('ioniq') || model.includes('leaf') || model.includes('zoe')) {
+                        brandstof = 'Elektriciteit';
+                    }
+                }
+                document.getElementById('brandstof').value = brandstof;
+                
                 document.getElementById('gewicht').value = vehicle.massa_ledig_voertuig || '';
 
                 // Get additional technical data
@@ -647,10 +663,18 @@ $currentYear = date('Y');
             const aankoopprijs = parseFloat(document.getElementById('aankoopprijs').value) || 25000;
             const brutoInkomen = parseFloat(document.getElementById('bruto_inkomen').value) || 60000;
 
-            // Estimate fuel consumption
+            // Estimate fuel consumption with improved electric detection
             let verbruik = '';
-            if (brandstof.toLowerCase().includes('elektriciteit')) {
-                verbruik = Math.round((gewicht / 60) + 15) + ' kWh/100km';
+            const isElektrisch = brandstof.toLowerCase().includes('elektriciteit') || 
+                                 brandstof.toLowerCase().includes('electric') ||
+                                 vehicle.merk === 'TESLA';
+            
+            if (isElektrisch) {
+                // More accurate electric consumption: Tesla Model 3 ~15-18 kWh/100km
+                let baseConsumption = 16; // Base for efficient electric cars
+                if (gewicht > 2000) baseConsumption += 4; // Heavy EVs
+                if (gewicht > 2500) baseConsumption += 4; // Very heavy EVs  
+                verbruik = baseConsumption + ' kWh/100km';
             } else if (brandstof.toLowerCase().includes('diesel')) {
                 verbruik = Math.round((gewicht / 250) + 4) + ' l/100km';
             } else {
@@ -658,11 +682,18 @@ $currentYear = date('Y');
             }
             document.getElementById('verbruik').value = verbruik;
 
-            // Calculate MRB
+            // Calculate MRB with consistent electric detection
             let mrb = 0;
-            if (brandstof.toLowerCase().includes('elektriciteit')) {
-                // Electric cars: €0 in 2024, 25% in 2025
-                mrb = <?php echo $currentYear; ?> >= 2025 ? Math.round((gewicht / 100) * 8 * 0.25) : 0;
+            if (isElektrisch) {
+                // Electric cars: €0 in 2024, 25% in 2025, full tariff from 2026
+                const year = <?php echo $currentYear; ?>;
+                if (year <= 2024) {
+                    mrb = 0;
+                } else if (year === 2025) {
+                    mrb = Math.round((gewicht / 100) * 8 * 0.25);
+                } else {
+                    mrb = Math.round((gewicht / 100) * 8); // Full tariff from 2026
+                }
             } else {
                 mrb = Math.round((gewicht / 100) * 8);
             }
@@ -676,12 +707,18 @@ $currentYear = date('Y');
             if (leeftijd < 5) verzekering += 20;
             document.getElementById('verzekering').value = Math.round(verzekering);
 
-            // Estimate maintenance
+            // Estimate maintenance with electric vehicle benefits
             let onderhoud = 75; // Base maintenance
             if (leeftijd > 10) onderhoud += 25;
             if (leeftijd > 15) onderhoud += 50;
-            if (brandstof.toLowerCase().includes('elektriciteit')) onderhoud -= 25;
-            document.getElementById('onderhoud').value = Math.round(onderhoud);
+            
+            // Electric vehicles have lower maintenance costs
+            if (isElektrisch) {
+                onderhoud -= 25; // No oil changes, brake pads last longer, fewer moving parts
+                if (leeftijd < 5) onderhoud -= 10; // Modern EVs very reliable when new
+            }
+            
+            document.getElementById('onderhoud').value = Math.max(25, Math.round(onderhoud)); // Minimum €25/month
 
             // Calculate tax percentage
             const belastingPercentage = calculateTaxPercentage(brutoInkomen);

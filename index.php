@@ -83,6 +83,12 @@ $bijtellingRules = [
                     <div>
                         <h1>🚗 AutoKosten Calculator</h1>
                         <p class="subtitle">Ontdek wat voordeliger is: Auto van de Zaak of Privé rijden</p>
+                        <!-- Version Toggle -->
+                        <div style="margin-top: 15px;">
+                            <a href="simpel.php" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 14px; box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3); transition: all 0.3s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(16, 185, 129, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 10px rgba(16, 185, 129, 0.3)'">
+                                <span>⚡</span> Probeer de Simpele Versie
+                            </a>
+                        </div>
                     </div>
                     <!-- Auto Manager Button -->
                     <div class="auto-manager-controls">
